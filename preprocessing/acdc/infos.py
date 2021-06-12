@@ -1,8 +1,34 @@
 import os
 from pathlib import Path
 import nibabel as nib
+from preprocessing import nifti
 
 TRAINING_PATH = Path(__file__).parent / '../../data/acdc/training/'
+
+
+def nb_of_images():
+    """
+    Count the number of training images and the number of labeled images.
+    :return: int (number of training images), int (number of labeled images)
+    """
+    patients = os.listdir(TRAINING_PATH)
+    img_gt_count = 0
+    img_count = 0
+    for patient in patients:
+        patient_path = str(TRAINING_PATH) + '/' + patient
+        contents = os.listdir(patient_path)
+        for content in contents:
+            if content[-9:] == 'gt.nii.gz':
+                img_path = patient_path + '/' + content
+                depth = nifti.get_dimensions(img_path)[2]
+                img_gt_count += depth
+            elif content[-9:] == '4d.nii.gz':
+                img_path = patient_path + '/' + content
+                img_obj = nib.load(img_path)
+                img_data = img_obj.get_fdata()
+                img_count += img_data.shape[3] * img_data.shape[2]
+
+    return img_count, img_gt_count
 
 
 def check_number_of_images():
@@ -38,14 +64,6 @@ def check_number_of_images():
     return 1
 
 
-def get_dimensions_nifti(img_path):
-    img_obg = nib.load(img_path)
-    img_data = img_obg.get_fdata()
-    height, weight, depth = img_data.shape
-
-    return height, weight, depth
-
-
 def check_img_depth_for_every_patients():
     """
     Check the number of slices in every nifti images.
@@ -61,12 +79,11 @@ def check_img_depth_for_every_patients():
             if content == 'Info.cfg' or content[-9:] == '4d.nii.gz':
                 continue
             img_path = patient_path + '/' + content
-            depth = get_dimensions_nifti(img_path)[2]
+            depth = nifti.get_dimensions(img_path)[2]
             depths.append(depth)
         if len(list(set(depths))) != 1:
             print('Issue in the number of slices for : ' + patient)
         else:
             nb_slices.append(depths[0])
-    print(list(set(nb_slices)))
 
     return list(set(nb_slices))
