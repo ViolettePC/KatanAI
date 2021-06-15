@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import nibabel as nib
-from preprocessing import nifti
+from preprocessing0 import nifti
 
 TRAINING_PATH = Path(__file__).parent / '../../data/acdc/training/'
 
@@ -87,3 +87,29 @@ def check_img_depth_for_every_patients():
             nb_slices.append(depths[0])
 
     return list(set(nb_slices))
+
+
+def check_spatial_resolution():
+    """
+    Search for the minimum and maximum spatial resolution (mm2/pixel) in the slides of
+    ED and ES of every patients.
+    :return: min (int), max (int)
+    """
+    patients = os.listdir(TRAINING_PATH)
+    mm2_per_pixel_resolutions = []
+    for patient in patients:
+        patient_path = str(TRAINING_PATH) + '/' + patient
+        contents = os.listdir(patient_path)
+        for content in contents:
+            if content == 'Info.cfg' or content[-9:] == '4d.nii.gz':
+                continue
+            img_path = patient_path + '/' + content
+            header = nifti.get_metadata_img(img_path)
+            pixdim = header['pixdim']
+            mm2_per_pixel_resolutions.append(pixdim[1])
+    mm2_per_pixel = list(set(mm2_per_pixel_resolutions))
+    mm2_per_pixel.sort()
+    min = mm2_per_pixel[0]
+    max = mm2_per_pixel[-1]
+
+    return min, max

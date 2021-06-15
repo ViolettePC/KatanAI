@@ -2,6 +2,43 @@ import nibabel as nib
 import matplotlib.pyplot as plt
 
 
+def get_metadata_img(img_path):
+    img_obj = nib.load(img_path)
+
+    return img_obj.header
+
+
+def get_slice_in_3d_img(img_path, slice_nb):
+    img_obj = nib.load(img_path)
+    img_data = img_obj.get_fdata()
+    if len(img_data.shape) != 3:
+        return None
+    slice = img_data[:, :, slice_nb]
+
+    return slice
+
+
+def visualize_slice_in_3d_img(img_path, slice_nb):
+    slice = get_slice_in_3d_img(img_path, slice_nb)
+    plt.imshow(slice)
+    plt.title('slice ' + str(slice_nb))
+    plt.show()
+
+    return None
+
+
+def get_slices_3d_img(img_path):
+    img_obj = nib.load(img_path)
+    img_data = img_obj.get_fdata()
+    slices = []
+    if len(img_data.shape) == 3:
+        depth = img_data.shape[2]
+        for i in range(depth):
+            slices.append(img_data[:, :, i])
+
+    return slices
+
+
 def visualize_slices_3d_img(img_path):
     """
     Show every slices of a 3D nifti image on one figure.
@@ -12,10 +49,11 @@ def visualize_slices_3d_img(img_path):
     img_data = img_obj.get_fdata()
     if len(img_data.shape) == 3:
         depth = img_data.shape[2]
-        rows = depth % 3 + 3
-        cols = 3
+        rows, cols = depth % 3 + 3, 3
         axes = []
         fig = plt.figure()
+        if img_data.shape[2] == 1:
+            cols, rows = 1, 1
         for i in range(depth):
             axes.append(fig.add_subplot(rows, cols, i + 1))
             plt.imshow(img_data[:, :, i])
