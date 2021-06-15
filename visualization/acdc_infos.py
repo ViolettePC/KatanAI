@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import nibabel as nib
-from preprocessing0 import nifti
+from visualization import nifti
 
 TRAINING_PATH = Path(__file__).parent / '../../data/acdc/training/'
 
