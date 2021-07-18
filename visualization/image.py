@@ -13,8 +13,15 @@ def display_nifti_slice(path, slice_number):
 
 
 def display_numpy_array_img(path):
+    """
+    Create a graph of the numpy array image
+    :param path: str
+    :return: None
+    """
     title = str(path).split('/')[-1]
     array = numpy.load(path)
     plt.imshow(array, interpolation='nearest')
     plt.title(title)
     plt.show()
+
+    return None

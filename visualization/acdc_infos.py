@@ -113,3 +113,16 @@ def check_spatial_resolution():
     max = mm2_per_pixel[-1]
 
     return min, max
+
+
+def check_orientation(dir_path):
+    patients = os.listdir(dir_path)
+    for patient in patients:
+        files = os.listdir(dir_path / patient)
+        for file in files:
+            if file[11:16] == "frame":
+                img_obj = nib.load(dir_path / patient / file)
+                x, y, z = nib.aff2axcodes(img_obj.affine)
+                print(x, y, z)
+
+    return None

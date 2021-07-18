@@ -8,17 +8,14 @@ def get_metadata_img(img_path):
     return img_obj.header
 
 
-def get_slice_in_3d_img(img_path, slice_nb):
-    img_obj = nib.load(img_path)
-    img_data = img_obj.get_fdata()
-    if len(img_data.shape) != 3:
-        return None
-    slice = img_data[:, :, slice_nb]
-
-    return slice
-
 
 def visualize_slice_in_3d_img(img_path, slice_nb):
+    """
+    Show one slice from a nifti 3d image
+    :param img_path: str
+    :param slice_nb: int
+    :return: None
+    """
     slice = get_slice_in_3d_img(img_path, slice_nb)
     plt.imshow(slice)
     plt.title('slice ' + str(slice_nb))
@@ -28,6 +25,11 @@ def visualize_slice_in_3d_img(img_path, slice_nb):
 
 
 def get_slices_3d_img(img_path):
+    """
+    Return all the slices from a 3d nitfi image
+    :param img_path: str
+    :return: array
+    """
     img_obj = nib.load(img_path)
     img_data = img_obj.get_fdata()
     slices = []
@@ -37,6 +39,22 @@ def get_slices_3d_img(img_path):
             slices.append(img_data[:, :, i])
 
     return slices
+
+
+def get_slice_in_3d_img(img_path, slice_nb):
+    """
+    Return one slice from a nifti image
+    :param img_path: str
+    :param slice_nb: int
+    :return: slice
+    """
+    img_obj = nib.load(img_path)
+    img_data = img_obj.get_fdata()
+    if len(img_data.shape) != 3:
+        return None
+    slice = img_data[:, :, slice_nb]
+
+    return slice
 
 
 def visualize_slices_3d_img(img_path):
@@ -49,7 +67,7 @@ def visualize_slices_3d_img(img_path):
     img_data = img_obj.get_fdata()
     if len(img_data.shape) == 3:
         depth = img_data.shape[2]
-        rows, cols = depth % 3 + 3, 3
+        rows, cols = depth % 3 + 4, 3
         axes = []
         fig = plt.figure()
         if img_data.shape[2] == 1:
