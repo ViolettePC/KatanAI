@@ -18,5 +18,5 @@ COPY . .
 CMD [ "python3", "./main.py" ]
 
 # sudo docker build -t katanai .
-# docker run katanai
+# docker run katana
 # docker run -d ubuntu tail -f /dev/null
