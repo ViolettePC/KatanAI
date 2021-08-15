@@ -27,7 +27,7 @@ Unzip the directory with the following command
 unzip data.zip
 ```
 
-This directory contain for each dataset:
+This directory contains for each dataset:
 - The raw directory (as downloaded from the official source) (name: raw).
 - Two raw directories representing the split between the testing and training sets (names: training, testing). 
 - Two directories with normalized images (names: testing_normalized, training_normalized).
