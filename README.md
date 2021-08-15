@@ -36,8 +36,15 @@ Re-running the pre-processing pipelines will overwrite the splited and normalize
 
 ## Trained models
 
-Trained models and their learning histories are stored in saved_model/.
-Every new training will overwrites the corresponding saved model. 
+Place the saved_model.zip file provided in the additional documents in the root of the project (./KatanAI/)
+
+Unzip the directory with the following command
+
+```bash
+unzip saved_model.zip
+```
+
+Every new training will overwrites the corresponding saved model.
 
 ## Python Virtual Environment Installation
 Using Python 3.9.6 and pip 21.1.3 
