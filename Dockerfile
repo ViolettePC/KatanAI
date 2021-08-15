@@ -16,7 +16,3 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 CMD [ "python3", "./main.py" ]
-
-# sudo docker build -t katanai .
-# docker run katana
-# docker run -d ubuntu tail -f /dev/null

@@ -7,6 +7,12 @@ from preprocessing import config_preprocessing
 
 
 def split_training_testing_set(config, percentage):
+    """
+    Slit the raw directory between a testing and a training directory.
+    :param config: config object.
+    :param percentage: int, percentage of the raw directory destined to the training test.
+    :return: None
+    """
     clean_raw_file(config)
 
     pets_images = os.listdir(config['images_raw_path'])
@@ -50,6 +56,12 @@ def clean_raw_file(config):
 
 
 def check_shape_dataset(pets_images, pets_masks):
+    """
+    Verify that the number of pet images match the number of labeled images.
+    :param pets_images: array.
+    :param pets_masks: array.
+    :return: int, total number of images/masks couples.
+    """
     pets_images_count = 0
     pets_masks_count = 0
 
@@ -74,6 +86,10 @@ def create_directory(path):
 
 
 def launch_preprocessing():
+    """
+    Preprocessing pipeline, launching normalization for both training and testing sets.
+    :return: None
+    """
     split_training_testing_set(config_preprocessing.OXFORD_PETS, percentage=80)
     norm_training = NormalizationOxfordPets(config_preprocessing.OXFORD_PETS['training_set'],
                                             config_preprocessing.OXFORD_PETS['image_size'])

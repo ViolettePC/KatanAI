@@ -44,12 +44,12 @@ class TrainingFCN8:
 
         if os.path.exists(self.save_path):
             shutil.rmtree(self.save_path)
-        os.mkdir(self.save_path)
+        os.makedirs(self.save_path)
         model.save(self.save_path / 'fcn_8.h5')
 
-        if os.path.isfile(self.save_path / 'history.json'):
-            os.remove(self.save_path / 'history.json')
-        with open(self.save_path / 'history.json', 'w') as f:
+        if os.path.isfile(self.save_path / 'history_fcn_8.json'):
+            os.remove(self.save_path / 'history_fcn_8.json')
+        with open(self.save_path / 'history_fcn_8.json', 'w') as f:
             json.dump(history.history, f)
 
 
@@ -64,10 +64,10 @@ def train_on_acdc():
         config_preprocessing.ACDC['training_set']['path_normalized_masks'],
         config_preprocessing.ACDC['image_size']
     )[0]
-    training_fcn_8 = TrainingFCN8(config_preprocessing.ACDC['saved_model']['unet'],
+    training_fcn_8 = TrainingFCN8(config_preprocessing.ACDC['saved_model']['fcn_8'],
                                   config_preprocessing.ACDC['image_size'])
     training_fcn_8.build_model()
-    training_fcn_8.train_model(num_epochs=50, training_set=training_set)
+    training_fcn_8.train_model(num_epochs=40, training_set=training_set)
 
 
 def train_on_mm2():
@@ -81,9 +81,9 @@ def train_on_mm2():
         config_preprocessing.MM2['training_set']['path_normalized_masks'],
         config_preprocessing.MM2['image_size']
     )[0]
-    training_fcn_8 = TrainingFCN8(config_preprocessing.MM2['saved_model']['unet'],
+    training_fcn_8 = TrainingFCN8(config_preprocessing.MM2['saved_model']['fcn_8'],
                                   config_preprocessing.MM2['image_size'])
-    training_fcn_8.train_model(num_epochs=50, training_set=training_set)
+    training_fcn_8.train_model(num_epochs=40, training_set=training_set)
 
 
 def train_on_oxford_pets():
@@ -97,6 +97,6 @@ def train_on_oxford_pets():
         config_preprocessing.OXFORD_PETS['training_set']['path_normalized_masks'],
         config_preprocessing.OXFORD_PETS['image_size']
     )[0]
-    training_fcn_8 = TrainingFCN8(config_preprocessing.OXFORD_PETS['saved_model']['unet'],
+    training_fcn_8 = TrainingFCN8(config_preprocessing.OXFORD_PETS['saved_model']['fcn_8'],
                                   config_preprocessing.OXFORD_PETS['image_size'])
-    training_fcn_8.train_model(num_epochs=50, training_set=training_set)
+    training_fcn_8.train_model(num_epochs=40, training_set=training_set)

@@ -44,12 +44,12 @@ class TrainingUnet:
 
         if os.path.exists(self.save_path):
             shutil.rmtree(self.save_path)
-        os.mkdir(self.save_path)
+        os.makedirs(self.save_path)
         model.save(self.save_path / 'unet.h5')
 
-        if os.path.isfile(self.save_path / 'history.json'):
-            os.remove(self.save_path / 'history.json')
-        with open(self.save_path / 'history.json', 'w') as f:
+        if os.path.isfile(self.save_path / 'history_unet.json'):
+            os.remove(self.save_path / 'history_unet.json')
+        with open(self.save_path / 'history_unet.json', 'w') as f:
             json.dump(history.history, f)
 
 
@@ -67,7 +67,7 @@ def train_on_acdc():
     training_unet = TrainingUnet(config_preprocessing.ACDC['saved_model']['unet'],
                                  config_preprocessing.ACDC['image_size'],
                                  n_levels=5)
-    training_unet.train_model(num_epochs=50, training_set=training_set)
+    training_unet.train_model(num_epochs=40, training_set=training_set)
 
 
 def train_on_mm2():
@@ -84,7 +84,7 @@ def train_on_mm2():
     training_unet = TrainingUnet(config_preprocessing.MM2['saved_model']['unet'],
                                  config_preprocessing.MM2['image_size'],
                                  n_levels=5)
-    training_unet.train_model(num_epochs=50, training_set=training_set)
+    training_unet.train_model(num_epochs=40, training_set=training_set)
 
 
 def train_on_oxford_pets():
@@ -101,4 +101,4 @@ def train_on_oxford_pets():
     training_unet = TrainingUnet(config_preprocessing.OXFORD_PETS['saved_model']['unet'],
                                  config_preprocessing.OXFORD_PETS['image_size'],
                                  n_levels=5)
-    training_unet.train_model(num_epochs=50, training_set=training_set)
+    training_unet.train_model(num_epochs=40, training_set=training_set)

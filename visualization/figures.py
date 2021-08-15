@@ -134,8 +134,10 @@ def figure_6():
     Plot learning history (accuracy and loss) of FCN-8 on M&Ms-2.
     :return: None
     """
-    model_training_metrics.plot_training_accuracy(config_preprocessing.MM2['saved_model']['fcn_8'] / 'history.json')
-    model_training_metrics.plot_training_loss(config_preprocessing.MM2['saved_model']['fcn_8'] / 'history.json')
+    model_training_metrics.plot_training_accuracy(
+        config_preprocessing.MM2['saved_model']['fcn_8'] / 'history_fcn_8.json')
+    model_training_metrics.plot_training_loss(
+        config_preprocessing.MM2['saved_model']['fcn_8'] / 'history_fcn_8.json')
 
     return None
 
@@ -349,16 +351,110 @@ def figure_b1():
     Learning curves of Appendix B.
     :return: None.
     """
-    model_training_metrics.plot_training_accuracy(config_preprocessing.ACDC['saved_model']['fcn_8'] / 'history.json')
-    model_training_metrics.plot_training_loss(config_preprocessing.ACDC['saved_model']['fcn_8'] / 'history.json')
+    model_training_metrics.plot_training_accuracy(
+        config_preprocessing.ACDC['saved_model']['fcn_8'] / 'history_fcn_8.json')
+    model_training_metrics.plot_training_loss(
+        config_preprocessing.ACDC['saved_model']['fcn_8'] / 'history_fcn_8.json')
 
-    model_training_metrics.plot_training_accuracy(config_preprocessing.MM2['saved_model']['fcn_8'] / 'history.json')
-    model_training_metrics.plot_training_loss(config_preprocessing.MM2['saved_model']['fcn_8'] / 'history.json')
+    model_training_metrics.plot_training_accuracy(
+        config_preprocessing.MM2['saved_model']['fcn_8'] / 'history_fcn_8.json')
+    model_training_metrics.plot_training_loss(
+        config_preprocessing.MM2['saved_model']['fcn_8'] / 'history_fcn_8.json')
 
-    model_training_metrics.plot_training_accuracy(config_preprocessing.ACDC['saved_model']['unet'] / 'history.json')
-    model_training_metrics.plot_training_loss(config_preprocessing.ACDC['saved_model']['unet'] / 'history.json')
+    model_training_metrics.plot_training_accuracy(
+        config_preprocessing.ACDC['saved_model']['unet'] / 'history_unet.json')
+    model_training_metrics.plot_training_loss(
+        config_preprocessing.ACDC['saved_model']['unet'] / 'history_unet.json')
 
-    model_training_metrics.plot_training_accuracy(config_preprocessing.MM2['saved_model']['unet'] / 'history.json')
-    model_training_metrics.plot_training_loss(config_preprocessing.MM2['saved_model']['unet'] / 'history.json')
+    model_training_metrics.plot_training_accuracy(
+        config_preprocessing.MM2['saved_model']['unet'] / 'history_unet.json')
+    model_training_metrics.plot_training_loss(
+        config_preprocessing.MM2['saved_model']['unet'] / 'history_unet.json')
 
     return None
+
+
+def figure_additional_resource_3_2():
+    """
+    Presentation of a pre-processed Oxford Pets image and the corresponding ground truth segmentation.
+    (Abyssinian 2).
+    :return: None
+    """
+    path_img = config_preprocessing.OXFORD_PETS['training_set']['path_normalized_images'] / 'Abyssinian_2.npy'
+    path_mask = config_preprocessing.OXFORD_PETS['training_set']['path_normalized_masks'] / 'Abyssinian_2.npy'
+    img_data = np.load(path_img)
+    mask_data = np.load(path_mask)
+
+    fig = plt.figure()
+    axes = []
+    cols, rows = 2, 1
+
+    axes.append(fig.add_subplot(rows, cols, 1))
+    plt.imshow(img_data, interpolation='nearest')
+    plt.tick_params(labelsize=7)
+    plt.xlabel('px', fontsize=7)
+    plt.ylabel('px', fontsize=7)
+
+    axes.append(fig.add_subplot(rows, cols, 2))
+    plt.imshow(mask_data, interpolation='nearest')
+    plt.tick_params(labelsize=7)
+    plt.xlabel('px', fontsize=7)
+    plt.ylabel('px', fontsize=7)
+
+    fig.tight_layout()
+    plt.show()
+
+    return None
+
+
+def figure_additional_resource_3_3a():
+    """
+    Get training curves for Unet on Oxford Pets dataset.
+    :return: None
+    """
+    model_training_metrics.plot_training_accuracy(
+        config_preprocessing.OXFORD_PETS['saved_model']['unet'] / 'history_unet.json')
+    model_training_metrics.plot_training_loss(
+        config_preprocessing.OXFORD_PETS['saved_model']['unet'] / 'history_unet.json')
+
+    return None
+
+
+def figure_additional_resource_3_3b():
+    """
+    Get training curves for FCN-8 on Oxford Pets dataset.
+    :return: None
+    """
+
+    model_training_metrics.plot_training_accuracy(
+        config_preprocessing.OXFORD_PETS['saved_model']['fcn_8'] / 'history_fcn_8.json')
+    model_training_metrics.plot_training_loss(
+        config_preprocessing.OXFORD_PETS['saved_model']['fcn_8'] / 'history_fcn_8.json')
+
+    return None
+
+
+def figure_additional_resource_3_table_1():
+    """
+    Get performance metrics values for both UNet and FCN-8 when trained and tested on Oxford Pets.
+    :return:
+    """
+    unet_experiment = testing_unet.predict_on_oxford_pets(1)
+    unet_loss, unet_accuracy = testing_unet.test_on_oxford_pets(1)
+
+    fcn8_experiment = testing_fcn8.predict_on_oxford_pets(1)
+    fcn8_loss, fcn8_accuracy = testing_fcn8.test_on_oxford_pets(1)
+
+    print('unet experiment on Oxford Pets.....................')
+    print('mean dice', round(np.mean(unet_experiment[2]), 3))
+    print('mean HD', round(np.mean(unet_experiment[3]), 3))
+    print('accuracy: {:5.2f}%'.format(100 * unet_accuracy))
+    print('loss: {:5.2f}%'.format(100 * unet_loss))
+    print('...................................................')
+
+    print('fcn-8 experiment on Oxford Pets.....................')
+    print('mean dice', round(np.mean(fcn8_experiment[2]), 3))
+    print('mean HD', round(np.mean(fcn8_experiment[3]), 3))
+    print('accuracy: {:5.2f}%'.format(100 * fcn8_accuracy))
+    print('loss: {:5.2f}%'.format(100 * fcn8_loss))
+    print('...................................................')

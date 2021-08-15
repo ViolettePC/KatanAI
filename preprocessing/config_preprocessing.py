@@ -70,11 +70,3 @@ OXFORD_PETS = {
         'fcn_8': KATANAI_ROOT / 'saved_model' / 'fcn_8' / 'oxford_pets'
     }
 }
-
-CROSS_EXPERIMENTS = {
-    'saved_model': {
-        'unet': KATANAI_ROOT / 'saved_model' / 'u_net' / 'acdc_mm2',
-        'fcn_8': KATANAI_ROOT / 'saved_model' / 'fcn_8' / 'acdc_mm2'
-    },
-    'image_size': (192, 192)
-}

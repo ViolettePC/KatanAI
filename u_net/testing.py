@@ -141,7 +141,7 @@ def test_on_mm2(trained_on):
     return loss, accuracy
 
 
-def test_on_oxford_pets():
+def test_on_oxford_pets(trained_on):
     """
     Test trained model on Oxford Pets testing set.
     :param trained_on: int, Id of the dataset used for training.
@@ -153,7 +153,7 @@ def test_on_oxford_pets():
         config_preprocessing.OXFORD_PETS['testing_set']['path_normalized_masks'],
         config_preprocessing.OXFORD_PETS['image_size']
     )[0]
-    testing_unet = TestingUnet(config_preprocessing.OXFORD_PETS)
+    testing_unet = TestingUnet(trained_on)
     loss, accuracy = testing_unet.test_model(testing_set=testing_set)
 
     return loss, accuracy
