@@ -1,20 +1,20 @@
 import tensorflow as tf
-from .data import DataUNet
+from .data import DataFCN8
 from preprocessing import config_preprocessing
 import numpy as np
 from scipy.spatial.distance import directed_hausdorff
 
 
-class TestingUnet:
+class TestingFCN8:
 
     def __init__(self, trained_on):
 
         if trained_on == 0:
-            self.save_path = config_preprocessing.ACDC['saved_model']['unet']
+            self.save_path = config_preprocessing.ACDC['saved_model']['fcn_8']
         elif trained_on == 2:
-            self.save_path = config_preprocessing.MM2['saved_model']['unet']
+            self.save_path = config_preprocessing.MM2['saved_model']['fcn_8']
         elif trained_on == 1:
-            self.save_path = config_preprocessing.OXFORD_PETS['saved_model']['unet']
+            self.save_path = config_preprocessing.OXFORD_PETS['saved_model']['fcn_8']
 
     def dice(self, ground_truth, predicted_mask):
         """
@@ -74,7 +74,7 @@ class TestingUnet:
         :param testing_set: testing set object
         :return: loss (float), accuracy (float)
         """
-        trained_model = tf.keras.models.load_model(self.save_path / 'unet.h5')
+        trained_model = tf.keras.models.load_model(self.save_path / 'fcn_8.h5')
         loss, accuracy = trained_model.evaluate(testing_set[0], testing_set[1], verbose=2)
 
         return loss, accuracy
@@ -87,8 +87,9 @@ class TestingUnet:
         :return: array of filtered masks.
         """
         filtred_values = []
-        for prediction in prediction_values:
-            filtred_values.append(np.array(prediction > min_prob))
+        for prection in prediction_values:
+            filtred_values.append(np.array(prection > min_prob))
+
         return filtred_values
 
     def get_predictions(self, testing_set):
@@ -97,10 +98,9 @@ class TestingUnet:
         :param testing_set: testing set object.
         :return: array of predicted masks.
         """
-        trained_model = tf.keras.models.load_model(self.save_path / 'unet.h5', compile=True)
+        trained_model = tf.keras.models.load_model(self.save_path / 'fcn_8.h5', compile=True)
         prediction_values = self.filter_probabilities_predictions(
             trained_model.predict(testing_set[0]))
-        # prediction_values = trained_model.predict(testing_set[0])
 
         return prediction_values
 
@@ -111,14 +111,14 @@ def test_on_acdc(trained_on):
     :param trained_on: int, Id of the dataset used for training.
     :return: loss and accuracy values (floats).
     """
-    testing_set = DataUNet(
+    testing_set = DataFCN8(
         config_preprocessing.ACDC['id'],
         config_preprocessing.ACDC['testing_set']['path_normalized_images'],
         config_preprocessing.ACDC['testing_set']['path_normalized_masks'],
         config_preprocessing.ACDC['image_size']
     )[0]
-    testing_unet = TestingUnet(trained_on)
-    loss, accuracy = testing_unet.test_model(testing_set=testing_set)
+    testing_fcn8 = TestingFCN8(trained_on)
+    loss, accuracy = testing_fcn8.test_model(testing_set=testing_set)
 
     return loss, accuracy
 
@@ -129,32 +129,32 @@ def test_on_mm2(trained_on):
     :param trained_on: int, Id of the dataset used for training.
     :return: loss and accuracy values (floats).
     """
-    testing_set = DataUNet(
+    testing_set = DataFCN8(
         config_preprocessing.MM2['id'],
         config_preprocessing.MM2['testing_set']['path_normalized_images'],
         config_preprocessing.MM2['testing_set']['path_normalized_masks'],
         config_preprocessing.MM2['image_size']
     )[0]
-    testing_unet = TestingUnet(trained_on)
-    loss, accuracy = testing_unet.test_model(testing_set=testing_set)
+    testing_fcn8 = TestingFCN8(trained_on)
+    loss, accuracy = testing_fcn8.test_model(testing_set=testing_set)
 
     return loss, accuracy
 
 
-def test_on_oxford_pets():
+def test_on_oxford_pets(trained_on):
     """
     Test trained model on Oxford Pets testing set.
     :param trained_on: int, Id of the dataset used for training.
     :return: loss and accuracy values (floats).
     """
-    testing_set = DataUNet(
+    testing_set = DataFCN8(
         config_preprocessing.OXFORD_PETS['id'],
         config_preprocessing.OXFORD_PETS['testing_set']['path_normalized_images'],
         config_preprocessing.OXFORD_PETS['testing_set']['path_normalized_masks'],
         config_preprocessing.OXFORD_PETS['image_size']
     )[0]
-    testing_unet = TestingUnet(config_preprocessing.OXFORD_PETS)
-    loss, accuracy = testing_unet.test_model(testing_set=testing_set)
+    testing_fcn8 = TestingFCN8(trained_on)
+    loss, accuracy = testing_fcn8.test_model(testing_set=testing_set)
 
     return loss, accuracy
 
@@ -166,16 +166,16 @@ def predict_on_acdc(trained_on):
     :param trained_on: int, Id of the dataset used for training.
     :return: array of prediction values, testing set object, array of DICE values, array of HD values.
     """
-    testing_set = DataUNet(
+    testing_set = DataFCN8(
         config_preprocessing.ACDC['id'],
         config_preprocessing.ACDC['testing_set']['path_normalized_images'],
         config_preprocessing.ACDC['testing_set']['path_normalized_masks'],
         config_preprocessing.ACDC['image_size']
     )[0]
-    testing_unet = TestingUnet(trained_on)
-    prediction_values = testing_unet.get_predictions(testing_set=testing_set)
-    dice_values = testing_unet.get_dice_values(prediction_values, testing_set[1])
-    hausdorff_distance_values = testing_unet.get_hausdorff_values(prediction_values, testing_set[1])
+    testing_fcn8 = TestingFCN8(trained_on)
+    prediction_values = testing_fcn8.get_predictions(testing_set=testing_set)
+    dice_values = testing_fcn8.get_dice_values(prediction_values, testing_set[1])
+    hausdorff_distance_values = testing_fcn8.get_hausdorff_values(prediction_values, testing_set[1])
 
     return prediction_values, testing_set, dice_values, hausdorff_distance_values
 
@@ -187,16 +187,16 @@ def predict_on_mm2(trained_on):
     :param trained_on: int, Id of the dataset used for training.
     :return: array of prediction values, testing set object, array of DICE values, array of HD values.
     """
-    testing_set = DataUNet(
+    testing_set = DataFCN8(
         config_preprocessing.MM2['id'],
         config_preprocessing.MM2['testing_set']['path_normalized_images'],
         config_preprocessing.MM2['testing_set']['path_normalized_masks'],
         config_preprocessing.MM2['image_size']
     )[0]
-    testing_unet = TestingUnet(trained_on)
-    prediction_values = testing_unet.get_predictions(testing_set=testing_set)
-    dice_values = testing_unet.get_dice_values(prediction_values, testing_set[1])
-    hausdorff_distance_values = testing_unet.get_hausdorff_values(prediction_values, testing_set[1])
+    testing_fcn8 = TestingFCN8(trained_on)
+    prediction_values = testing_fcn8.get_predictions(testing_set=testing_set)
+    dice_values = testing_fcn8.get_dice_values(prediction_values, testing_set[1])
+    hausdorff_distance_values = testing_fcn8.get_hausdorff_values(prediction_values, testing_set[1])
 
     return prediction_values, testing_set, dice_values, hausdorff_distance_values
 
@@ -208,15 +208,15 @@ def predict_on_oxford_pets(trained_on):
     :param trained_on: int, Id of the dataset used for training.
     :return: array of prediction values, testing set object, array of DICE values, array of HD values.
     """
-    testing_set = DataUNet(
+    testing_set = DataFCN8(
         config_preprocessing.OXFORD_PETS['id'],
         config_preprocessing.OXFORD_PETS['testing_set']['path_normalized_images'],
         config_preprocessing.OXFORD_PETS['testing_set']['path_normalized_masks'],
         config_preprocessing.OXFORD_PETS['image_size']
     )[0]
-    testing_unet = TestingUnet(trained_on)
-    prediction_values = testing_unet.get_predictions(testing_set=testing_set)
-    dice_values = testing_unet.get_dice_values(prediction_values, testing_set[1])
-    hausdorff_distance_values = testing_unet.get_hausdorff_values(prediction_values, testing_set[1])
+    testing_fcn8 = TestingFCN8(trained_on)
+    prediction_values = testing_fcn8.get_predictions(testing_set=testing_set)
+    dice_values = testing_fcn8.get_dice_values(prediction_values, testing_set[1])
+    hausdorff_distance_values = testing_fcn8.get_hausdorff_values(prediction_values, testing_set[1])
 
     return prediction_values, testing_set, dice_values, hausdorff_distance_values

@@ -16,3 +16,4 @@ SimpleITK~=2.0.2
 nipype~=1.6.0
 tensorflow~=2.5.0
 torch~=1.9.0
+scipy~=1.6.3

@@ -1,9 +1,9 @@
+from preprocessing import config_preprocessing
 import os
 import random
-import shutil
-from .normalization import NormalizationACDC
-from preprocessing import config_preprocessing
 import numpy as np
+import shutil
+from preprocessing.mm2.normalization import NormalizationMM2
 
 
 def split_training_testing_set(config, percentage):
@@ -45,10 +45,10 @@ def launch_preprocessing():
     Preprocessing pipeline, launching normalization for both training and testing sets.
     :return: None
     """
-    split_training_testing_set(config_preprocessing.ACDC, percentage=80)
-    norm_training = NormalizationACDC(config_preprocessing.ACDC['training_set'])
+    split_training_testing_set(config_preprocessing.MM2, percentage=80)
+    norm_training = NormalizationMM2(config_preprocessing.MM2['training_set'])
     norm_training.normalize()
-    norm_testing = NormalizationACDC(config_preprocessing.ACDC['testing_set'])
+    norm_testing = NormalizationMM2(config_preprocessing.MM2['testing_set'])
     norm_testing.normalize()
 
     return None

@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 
-class DataUNet:
+class DataFCN8:
     """
     Present images/masks to model.
     """

@@ -3,15 +3,19 @@ import matplotlib.pyplot as plt
 
 
 def get_metadata_img(img_path):
+    """
+    Load header of a Nifti image.
+    :param img_path: str
+    :return: header object
+    """
     img_obj = nib.load(img_path)
 
     return img_obj.header
 
 
-
 def visualize_slice_in_3d_img(img_path, slice_nb):
     """
-    Show one slice from a nifti 3d image
+    Show one slice from a Nifti 3d image
     :param img_path: str
     :param slice_nb: int
     :return: None
@@ -26,9 +30,9 @@ def visualize_slice_in_3d_img(img_path, slice_nb):
 
 def get_slices_3d_img(img_path):
     """
-    Return all the slices from a 3d nitfi image
+    Return all slices from a 3D Nitfi image
     :param img_path: str
-    :return: array
+    :return: array of images
     """
     img_obj = nib.load(img_path)
     img_data = img_obj.get_fdata()
@@ -43,10 +47,10 @@ def get_slices_3d_img(img_path):
 
 def get_slice_in_3d_img(img_path, slice_nb):
     """
-    Return one slice from a nifti image
+    Return one slice from a 3D nifti image
     :param img_path: str
     :param slice_nb: int
-    :return: slice
+    :return: slice image
     """
     img_obj = nib.load(img_path)
     img_data = img_obj.get_fdata()
@@ -85,7 +89,7 @@ def visualize_slices_3d_img(img_path):
 
 def get_dimensions(img_path):
     """
-    Load a nifti image anf return its dimensions
+    Get dimensions of a Nifti image
     :param img_path: str
     :return: list the size of the n dimensions of the image ([height, weight, slices, frames])
     """
@@ -93,27 +97,3 @@ def get_dimensions(img_path):
     img_data = img_obj.get_fdata()
 
     return img_data.shape
-
-
-def visualize_slices_of_frame(img_path, frame):
-    """
-    Show every slices of a specific frame from a 4d nifti image on one figure.
-    :param img_path: str
-    :param frame: int
-    :return: None
-    """
-    img_obj = nib.load(img_path)
-    img_data = img_obj.get_fdata()
-    slices = img_data.shape[2]
-    fig = plt.figure()
-    axes = []
-    rows, cols = slices % 3 + 3, 3
-    for slice in range(slices):
-        axes.append(fig.add_subplot(rows, cols, slice + 1))
-        plt.imshow(img_data[:, :, slice, frame])
-        plt.axis('off')
-        axes[-1].set_title(slice)
-    fig.tight_layout()
-    plt.show()
-
-    return None

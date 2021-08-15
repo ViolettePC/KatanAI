@@ -1,21 +1,11 @@
 import os
-import nibabel as nib
-import cv2
-import numpy as np
 import shutil
+import nibabel as nib
+import numpy as np
+import cv2
 
 
-class NormalizationACDC:
-    """
-    Normalize ACDC dataset:
-    Select frames of end systole and end diastole in short axis view.
-    Break down frames into slices.
-    Transform slices into NumPy arrays.
-    Rescale images (spatial resolution of 1mm*2 / pixel).
-    Crop images in a square shape (192 pixels) around the center.
-    Apply CLAHE transformation.
-    Store images in a new directory.
-    """
+class NormalizationMM2:
     def __init__(self, config):
         self.path = config['path']
         self.path_normalized = config['path_normalized']
@@ -23,6 +13,17 @@ class NormalizationACDC:
         self.path_normalized_masks = config['path_normalized_masks']
 
     def normalize(self):
+        """
+        Normalize M&Ms-2 dataset:
+        Select frames of end systole and end diastole in short axis view.
+        Break down frames into slices.
+        Transform slices into NumPy arrays.
+        Rescale images (spatial resolution of 1mm*2 / pixel).
+        Crop images in a square shape (192 pixels) around the center.
+        Apply CLAHE transformation.
+        Store images in a new directory.
+        :return: None
+        """
         self.create_normalized_directory()
         patients = os.listdir(self.path)
         for patient in patients:
@@ -34,37 +35,32 @@ class NormalizationACDC:
                     images = self.transform_img_to_numpy_arrays(file_path, 0)
                     pixdim = self.get_spatial_resolution(file_path)
                     images_rescaled = self.rescale(images, pixdim)
-                    images_cropped = self.crop(images_rescaled)
-                    images_clahe = self.clahe(images_cropped)
+                    images_croped = self.crop(images_rescaled)
+                    images_clahe = self.clahe(images_croped)
                     self.save_numpy_images(images_clahe, new_name, 0)
 
                 elif self.get_file_type(file) == 1:
                     images = self.transform_img_to_numpy_arrays(file_path, 1)
                     pixdim = self.get_spatial_resolution(file_path)
                     images_rescaled = self.rescale(images, pixdim)
-                    images_cropped = self.crop(images_rescaled)
-                    self.save_numpy_images(images_cropped, new_name, 1)
+                    images_croped = self.crop(images_rescaled)
+                    self.save_numpy_images(images_croped, new_name, 1)
 
         self.filter_empty_mask()
 
         return None
 
-    def filter_empty_mask(self):
+    def convert_16bit_8bit(self, img):
         """
-        After the normalization process, images who does not contain the RV are dropped.
-        :return: None
+        Convert a 16bit image to a 8bit image
+        :param img: numpy array of the 16 bit image
+        :return: numpy image of the 8 bit image
         """
-        masks = os.listdir(self.path_normalized_masks)
-        total, droped = len(masks), 0
-        for mask in masks:
-            data = np.load(self.path_normalized_masks / mask)
-            min, max = np.min(data), np.max(data)
-            if max == 0:
-                os.remove(self.path_normalized_masks / mask)
-                os.remove(self.path_normalized_images / mask)
-                droped += 1
+        min_16 = np.min(img)
+        max_16 = np.max(img)
+        img_8 = np.array(np.rint((255 * (img - min_16)) / float(max_16 - min_16)), dtype=np.uint8)
 
-        return None
+        return img_8
 
     def clahe(self, img_arrays, tile_size=(1, 1)):
         """
@@ -74,24 +70,12 @@ class NormalizationACDC:
         :return: array containing images with CLAHE transformation.
         """
         images_clahe = []
-        clahe = cv2.createCLAHE(tileGridSize=tile_size, clipLimit=2.5)
+        clahe = cv2.createCLAHE(tileGridSize=tile_size)
         for img in img_arrays:
             img_8bit = self.convert_16bit_8bit(img)
             images_clahe.append(clahe.apply(img_8bit))
 
         return images_clahe
-
-    def convert_16bit_8bit(self, img):
-        """
-        Convert a 16bit image to a 8bit image.
-        :param img: numpy array of the 16 bit image
-        :return: numpy image of the 8 bit image
-        """
-        min_16 = np.min(img)
-        max_16 = np.max(img)
-        img_8 = np.array(np.rint((255 * (img - min_16)) / float(max_16 - min_16)), dtype=np.uint8)
-
-        return img_8
 
     def crop(self, img_arrays, crop_size=192):
         """
@@ -110,41 +94,30 @@ class NormalizationACDC:
 
         return images_croped
 
-    def create_normalized_directory(self):
-        if os.path.exists(self.path_normalized):
-            shutil.rmtree(self.path_normalized)
-        os.mkdir(self.path_normalized)
-        os.mkdir(self.path_normalized_images)
-        os.mkdir(self.path_normalized_masks)
+    def filter_empty_mask(self):
+        """
+        After the normalization process, images who does not contain the RV are dropped.
+        :return: None
+        """
+        masks = os.listdir(self.path_normalized_masks)
+        total, droped = len(masks), 0
+        for mask in masks:
+            data = np.load(self.path_normalized_masks / mask)
+            min, max = np.min(data), np.max(data)
+            if max == 0:
+                os.remove(self.path_normalized_masks / mask)
+                os.remove(self.path_normalized_images / mask)
+                droped += 1
 
         return None
 
-    def get_file_type(self, file_name):
-        """
-        Label the type of file. 4 options possible.
-        Type 0 = unlabeled ES and ED frames
-        Type 1 = labeled ES and ED frames
-        Type 2 = Complete 4D image
-        Type 3 = Info file
-        :param file_name: str
-        :return: int
-        """
-        if file_name[-9:] == "gt.nii.gz":
-            return 1
-        elif file_name[-9:] == "4d.nii.gz":
-            return 2
-        elif file_name == 'Info.cfg':
-            return 3
-        else:
-            return 0
-
     def filter_right_ventricle(self, img):
         """
-        Only select the RV labeled class
+        Only select the RV labeled class (drop the others)
         :param img: numpy array of the image
         :return: numpy array of the filtered image
         """
-        img[img > 1] = 0
+        img[img < 3] = 0
 
         return img
 
@@ -182,6 +155,28 @@ class NormalizationACDC:
             )
 
         return images_rescaled
+
+    def create_normalized_directory(self):
+        if os.path.exists(self.path_normalized):
+            shutil.rmtree(self.path_normalized)
+        os.mkdir(self.path_normalized)
+        os.mkdir(self.path_normalized_images)
+        os.mkdir(self.path_normalized_masks)
+
+    def get_file_type(self, file_name):
+        """
+        Label the type of file.
+        Type 0 = unlabeled ED and ES frames
+        Type 1 = labeled ED and ES frames
+        :param file_name: str
+        :return: int
+        """
+        if file_name[-12:] == 'SA_ED.nii.gz' or file_name[-12:] == 'SA_ES.nii.gz':
+            return 0
+        elif file_name[-15:] == "SA_ED_gt.nii.gz" or file_name[-15:] == 'SA_ES_gt.nii.gz':
+            return 1
+        else:
+            return None
 
     def save_numpy_images(self, images_normalized, new_name, img_type):
         if img_type == 1:
